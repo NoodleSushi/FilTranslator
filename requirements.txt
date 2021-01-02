@@ -1,0 +1,7 @@
+googletrans==4.0.0rc1
+pyperclip==1.8.1
+pytesseract==0.3.7
+pyscreenshot==2.2
+appdirs==1.4.4
+requests==2.25.1
+Pillow==8.0.1
