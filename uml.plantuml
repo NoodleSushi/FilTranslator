@@ -1,0 +1,128 @@
+@startuml FilTranslator UML
+set namespaceSeparator ::
+
+package threading <<Node>>{
+    class threading::Thread{}
+}
+package tkinter <<Node>>{
+    class tkinter::Canvas{}
+    class tkinter::Button{}
+    class tkinter::Tk{}
+    class tkinter::StringVar{}
+    class tkinter::Label{}
+}
+package pyperclip <<Node>>{
+
+}
+package googletrans <<Node>>{
+    class googletrans::Translator{}
+}
+package dictionary.py {
+    class dictionary.py::Dictionary {
+        {static} DICT_LINK: str
+        {static} translate(word: str) -> list
+    }
+}
+package pytesseract <<Node>>{
+}
+package pyscreenshot <<Node>>{
+}
+package PIL <<Node>>{
+}
+package __main__.py {}
+__main__.py *-- fil_translator.py::FilTranslator
+__main__.py -[hidden]-> fil_translator.py::FilTranslator
+
+class fil_translator.py::FilTranslator {
+    - clipboard_watcher: clipboard_watcher.ClipboardWatcher
+    - translator_thread: translator_thread.TranslatorThread
+    - main_window: main_window.MainWindow
+    + __init__() → None
+    + update() → bool
+    - start_translator_thread(text: str) → None
+    - update_trans_text() → None
+    + _on_copy_button_press() → None
+    + _on_ocr_button_press() → None
+}
+fil_translator.py::FilTranslator -[hidden]> pyscreenshot
+fil_translator.py::FilTranslator -[hidden]> pytesseract
+fil_translator.py::FilTranslator -[hidden]> PIL
+fil_translator.py::FilTranslator o-- PIL
+fil_translator.py::FilTranslator o-- pytesseract
+fil_translator.py::FilTranslator o-- pyscreenshot
+fil_translator.py::FilTranslator *-- crop_window.py::CropWindow
+fil_translator.py::FilTranslator *-- clipboard_watcher.py::ClipboardWatcher
+fil_translator.py::FilTranslator *-- translator_thread.py::TranslatorThread
+fil_translator.py::FilTranslator *-- main_window.py::MainWindow
+
+class clipboard_watcher.py::ClipboardWatcher {
+    - new_text: str
+    - old_text: str
+    + __init__() → None
+    + is_changed() → bool
+    + get_new_text() → str
+    + copy(text: str) → None
+}
+clipboard_watcher.py::ClipboardWatcher o-- pyperclip
+
+class translator_thread.py::TranslatorThread {
+    - translator: googletrans.Translator
+    - text: str
+    - translated_text: str
+    - has_translated_text: bool
+    + __init__() → None
+    + start_translating(text: str) → None
+    - run() → None
+    + get_results() → Tuple[bool, str]
+}
+translator_thread.py::TranslatorThread -[hidden]-> threading::Thread
+threading::Thread <|-- translator_thread.py::TranslatorThread 
+translator_thread.py::TranslatorThread o-- dictionary.py::Dictionary
+translator_thread.py::TranslatorThread *-- googletrans::Translator
+
+package crop_window.py {
+    class CropCanvas {
+        - screenshot_img: tkinter.PhotoImage
+        - is_pressing: bool
+        - is_finished_cropping: bool
+        ~ is_active: bool
+        - crop_coords: List[int]
+        - window_border_rect: tkinter.Canvas.Rectangle
+        - crop_rect: tkinter.Canvas.Rectangle
+        - h_line: tkinter.Canvas.Line
+        - v_line: tkinter.Canvas.Line
+        - _binded_motion(event) → None
+        - _binded_pressed(event) → None
+        - _binded_released(event) → None
+        - _binded_close(_event) → None
+        ~ get_crop_coords() → Union[tuple, None]
+    }
+
+    class CropWindow {
+        - crop_canvas: CropCanvas
+        + get_crop_coords() → Union[tuple, None]
+    }
+    tkinter::Canvas <|-- CropCanvas
+    tkinter::Tk <|-- CropWindow
+    CropWindow *-- CropCanvas
+}
+
+package main_window.py{
+    class MainWindow {
+        - trans_stringvar: tkinter.StringVar
+        - trans_label: WrappingLabel
+        - ocr_button: tkinter.Button
+        - copy_button: tktiner.Button
+        + update_all() → None
+        + set_trans_text() → None
+        + get_trans_text() → None
+    }
+    class WrappingLabel {}
+    tkinter::Label <|-- WrappingLabel
+    tkinter::Tk <|-- MainWindow
+    MainWindow *-- WrappingLabel
+    MainWindow *-- tkinter::StringVar
+    MainWindow *-- tkinter::Button
+}
+
+@enduml
