@@ -1,7 +1,28 @@
-from typing import Union
+from typing import Union, List
 import tkinter as tk
 
 X1, Y1, X2, Y2 = 0, 1, 2, 3
+
+
+class CropWindow(tk.Tk):
+    def __init__(self):
+        super(CropWindow, self).__init__(className="Crop Window")
+        self.attributes("-fullscreen", True)
+        self.config(cursor="none")
+        self.focus_force()
+        self.crop_canvas: CropCanvas
+
+    def get_crop_coords(self, img_dir: str) -> Union[tuple, None]:
+        self.crop_canvas = CropCanvas(self, img_dir)
+        self.crop_canvas.pack(expand=tk.YES, fill=tk.BOTH)
+        
+        while self.crop_canvas.is_active:
+            self.update_idletasks()
+            self.update()
+        crop_coords: Union[tuple, None] = self.crop_canvas.get_crop_coords()
+        self.destroy()
+        
+        return crop_coords
 
 
 class CropCanvas(tk.Canvas):
@@ -13,7 +34,7 @@ class CropCanvas(tk.Canvas):
         self.is_pressing: bool = False
         self.is_finished_cropping: bool = False
         self.is_active = True
-        self.crop_coords: list = [0, 0, 0, 0]
+        self.crop_coords: List[int] = [0, 0, 0, 0]
         # bind input behaviors
         self.bind("<Motion>", self._binded_motion)
         self.bind("<Button-1>", self._binded_pressed)
@@ -60,21 +81,3 @@ class CropCanvas(tk.Canvas):
             return tuple(self.crop_coords)
         else:
             return None
-
-
-def get_crop_coords(img_dir: str) -> Union[tuple, None]:
-    crop_window: tk.Tk = tk.Tk(className="Crop Window")
-    crop_window.attributes("-fullscreen", True)
-    crop_window.config(cursor="none")
-    crop_window.focus_force()
-
-    crop_canvas: CropCanvas = CropCanvas(crop_window, img_dir)
-    crop_canvas.pack(expand=tk.YES, fill=tk.BOTH)
-    
-    while crop_canvas.is_active:
-        crop_window.update_idletasks()
-        crop_window.update()
-    crop_coords: Union[tuple, None] = crop_canvas.get_crop_coords()
-    crop_window.destroy()
-
-    return crop_coords
