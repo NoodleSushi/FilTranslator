@@ -41,8 +41,8 @@ class fil_translator.py::FilTranslator {
     + update() → bool
     - start_translator_thread(text: str) → None
     - update_trans_text() → None
-    + _on_copy_button_press() → None
-    + _on_ocr_button_press() → None
+    - _on_copy_button_press() → None
+    - _on_ocr_button_press() → None
 }
 fil_translator.py::FilTranslator -[hidden]> pyscreenshot
 fil_translator.py::FilTranslator -[hidden]> pytesseract
@@ -85,7 +85,7 @@ package crop_window.py {
         - screenshot_img: tkinter.PhotoImage
         - is_pressing: bool
         - is_finished_cropping: bool
-        ~ is_active: bool
+       ~ is_active: bool
         - crop_coords: List[int]
         - window_border_rect: tkinter.Canvas.Rectangle
         - crop_rect: tkinter.Canvas.Rectangle
